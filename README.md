@@ -15,7 +15,7 @@ This project lets kids continue the magic of their visit to Great Wolf Lodge by 
   
 🛠️ Hardware
 
-* ESP32-C3 DevKitM-1
+* ESP32-C3
 * IR Receiver (connected to GPIO5)
 * MagiQuest Wand (IR transmitter)
 * Smart Socket (configured in Home Assistant)
