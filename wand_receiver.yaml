@@ -1,0 +1,59 @@
+esphome:
+  name: wand_receiver
+  friendly_name: Wand Receiver
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_pass
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  output_power: 8.5dB
+
+captive_portal:
+
+
+globals:
+  - id: last_ir_time
+    type: unsigned long
+    restore_value: no
+    initial_value: '0'
+
+
+# Script that runs when a valid IR command is accepted
+script:
+  - id: toggle_lights
+    then:
+      - homeassistant.service:
+          service: switch.toggle
+          data:
+            entity_id: switch.smart_socket_socket_1
+
+# TODO: filter specific codes later
+remote_receiver:
+  pin: GPIO5
+  dump: all
+  on_raw:
+    then:
+      - lambda: |-
+          unsigned long now = millis();
+          if (now - id(last_ir_time) > 10000) {   // 10 seconds = 10000 ms
+            id(last_ir_time) = now;
+            id(toggle_lights).execute();
+          } else {
+            ESP_LOGD("ir", "Ignored IR code (cooldown active)");
+          }
